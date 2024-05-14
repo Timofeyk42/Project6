@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Змейка</title>
+    <style>
+        canvas {
+            border: 1px solid black;
+        }
+        .center {
+            text-align: center;
+        }
+        body {
+            background-color: #7FFFD4;
+        }
+        a {
+            color: black;
+            text-underline-offset: -9000px;
+            font-size: 40px;
+        }
+        button {
+            border-radius: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="center">
+    <button><a href="index.html">Перейти</a></button>
+    </div>
+    <h1></h1>
+    <div class="center">
+        <canvas id="canvas" width="400" height="400"></canvas>
+    </div>
+    <script>
+        // Получаем элемент canvas из DOM
+        var canvas = document.getElementById("canvas");
+        var ctx = canvas.getContext("2d");
+
+        // Задаем начальные значенияw
+        var snake = [{ x: 20, y: 20 }];
+        var direction = "right";
+        var food = generateFood();
+        var gameover = false;
+
+        // Задаем обработчик событий клавиатуры
+        document.addEventListener("keydown", function (event) {
+            if (event.key === "ArrowUp" && direction !== "down") {
+                direction = "up";
+            }
+            else if (event.key === "ArrowDown" && direction !== "up") {
+                direction = "down";
+            }
+            else if (event.key === "ArrowLeft" && direction !== "right") {
+                direction = "left";
+            }
+            else if (event.key === "ArrowRight" && direction !== "left") {
+                direction = "right";
+            }
+        });
+
+        // Основной цикл игры
+        setInterval(function () {
+            // Очищаем холст
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Проверяем, не столкнулась ли змейка со стеной
+            if (snake[0].x < 0 || snake[0].x >= canvas.width || snake[0].y < 0 || snake[0].y >= canvas.height) {
+                gameover = true;
+            }
+
+            // Проверяем, не столкнулась ли змейка сама с собой
+            for (var i = 1; i < snake.length; i++) {
+                if (snake[0].x === snake[i].x && snake[0].y === snake[i].y) {
+                    gameover = true;
+                }
+            }
+
+            // Проверяем, не съела ли змейка еду
+            if (snake[0].x === food.x && snake[0].y === food.y) {
+                food = generateFood();
+                snake.push({ x: snake[snake.length - 1].x, y: snake[snake.length - 1].y });
+            }
+
+            // Двигаем змейку в соответствии с направлением
+            if (direction === "up") {
+                snake.unshift({ x: snake[0].x, y: snake[0].y - 20 });
+            }
+            else if (direction === "down") {
+                snake.unshift({ x: snake[0].x, y: snake[0].y + 20 });
+            }
+            else if (direction === "left") {
+                snake.unshift({ x: snake[0].x - 20, y: snake[0].y });
+            }
+            else if (direction === "right") {
+                snake.unshift({ x: snake[0].x + 20, y: snake[0].y });
+            }
+
+            // Рисуем змейку и еду
+            for (var i = 0; i < snake.length; i++) {
+                ctx.fillStyle = "#000";
+                ctx.fillRect(snake[i].x, snake[i].y, 20, 20);
+            }
+            ctx.fillStyle = "#f00";
+            ctx.fillRect(food.x, food.y, 20, 20);
+
+            // Если игра окончена, выводим сообщение об этом
+            if (gameover) {
+                ctx.fillStyle = "#000";
+                ctx.font = "30px Arial";
+                ctx.textAlign = "center";
+                ctx.fillText("Game Over!", canvas.width / 2, canvas.height / 2);
+                return;
+            }
+
+            // Удаляем хвост змейки
+            snake.pop();
+        }, 100);
+
+        // Функция для генерации случайной еды
+        function generateFood() {
+            var x = Math.floor(Math.random() * canvas.width / 20) * 20;
+            var y = Math.floor(Math.random() * canvas.height / 20) * 20;
+            return { x: x, y: y };
+        }
+    </script>
+</body>
+
+</html>
